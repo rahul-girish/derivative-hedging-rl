@@ -1,0 +1,32 @@
+# Core numerical computing
+numpy
+pandas
+scipy
+
+# Machine Learning
+torch
+
+# Reinforcement Learning
+gymnasium
+
+# Visualization
+matplotlib
+plotly
+
+# Configuration
+hydra-core
+omegaconf
+
+# Progress bars
+tqdm
+
+# Testing
+pytest
+pytest-cov
+
+# Formatting
+black
+ruff
+
+# Utilities
+typing_extensions
