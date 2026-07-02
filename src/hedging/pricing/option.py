@@ -15,15 +15,15 @@ class OptionType(str, Enum):
 class OptionContract:
     """
     Represents a European vanilla option.
+    This class is immutable; time-dependent values like 'time to maturity' 
+    should be calculated externally relative to the contract's fixed maturity.
 
     Attributes
     ----------
     strike:
         Strike price.
-
     maturity:
-        Time to maturity in years.
-
+        Total time to maturity at inception (in years).
     option_type:
         Either CALL or PUT.
     """
