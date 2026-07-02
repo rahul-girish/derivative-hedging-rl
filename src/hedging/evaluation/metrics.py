@@ -25,3 +25,15 @@ def realized_volatility(values: list[float]) -> float:
     returns = np.diff(values)
 
     return float(np.std(returns))
+
+
+def total_transaction_cost(costs: list[float]) -> float:
+    return float(np.sum(costs))
+
+
+def mean_abs_hedging_error(errors: list[float]) -> float:
+    return float(np.mean(np.abs(errors)))
+
+
+def rmse(errors: list[float]) -> float:
+    return float(np.sqrt(np.mean(np.square(errors))))
