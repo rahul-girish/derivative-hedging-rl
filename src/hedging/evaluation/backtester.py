@@ -39,11 +39,20 @@ class Backtester:
         rate: float = 0.0,
     ) -> BacktestResult:
 
+        prices = path.prices[0]
+
         portfolio = Portfolio()
 
-        result = BacktestResult(prices=path.prices[0])
+        initial_option_price = black_scholes_price(
+            contract,
+            prices[0],
+            volatility,
+            rate,
+        )
 
-        prices = path.prices[0]
+        portfolio.initialize_option_sale(initial_option_price)
+
+        result = BacktestResult(prices=path.prices[0])
 
         for step, stock_price in enumerate(prices):
 
@@ -78,7 +87,10 @@ class Backtester:
                 stock_price,
             )
 
-            value = portfolio.value(stock_price)
+            value = portfolio.total_value(
+                stock_price,
+                option_value,
+            )
 
             result.portfolio_values.append(value)
             result.cash_history.append(portfolio.cash)

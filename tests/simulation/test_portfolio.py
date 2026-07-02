@@ -31,4 +31,4 @@ def test_value():
 
     p.buy(10, 100)
 
-    assert p.value(120) == 200
+    assert p.total_value(120, 0.0) == 200
