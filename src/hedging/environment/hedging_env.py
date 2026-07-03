@@ -239,6 +239,7 @@ class HedgingEnv(gym.Env):
         Execute one hedging step.
         """
 
+        # Target hedge position
         target_position = (
             float(action[0]) * self.max_position
         )
@@ -267,23 +268,49 @@ class HedgingEnv(gym.Env):
             self.rate,
         )
 
+    # -------------------------------------------------
+    # Calculate trade size BEFORE rebalancing
+    # -------------------------------------------------
+
+        trade_size = (
+            target_position
+            - self.portfolio.shares
+        )
+
+    # -------------------------------------------------
+    # Execute hedge
+    # -------------------------------------------------
+
         transaction_cost = self.execution_engine.rebalance(
             self.portfolio,
             target_position,
             stock_price,
         )
 
+    # -------------------------------------------------
+    # Portfolio value after hedge
+    # -------------------------------------------------
+
         portfolio_value = self.portfolio.total_value(
             stock_price,
             option_price,
         )
 
+    # -------------------------------------------------
+    # Compute reward
+    # -------------------------------------------------
+
         reward = float(
             self.reward_function(
                 hedging_error=portfolio_value,
                 transaction_cost=transaction_cost,
+                trade_size=trade_size,
             )
         )
+
+    # -------------------------------------------------
+    # Advance environment
+    # -------------------------------------------------
 
         self.current_step += 1
 
@@ -304,11 +331,19 @@ class HedgingEnv(gym.Env):
 
             observation = self._get_observation()
 
+    # -------------------------------------------------
+    # Extra information for evaluation
+    # -------------------------------------------------
+
         info = {
             "portfolio_value": portfolio_value,
             "transaction_cost": transaction_cost,
-            "shares": self.portfolio.shares,
-            "cash": self.portfolio.cash,
+            "trade_size": trade_size,
+            "stock_price": stock_price,
+            "strike": self.contract.strike,
+            "maturity": remaining,
+            "volatility": self.volatility,
+            "rate": self.rate,
         }
 
         return (
@@ -319,9 +354,10 @@ class HedgingEnv(gym.Env):
             info,
         )
 
+
     def _get_observation(self) -> np.ndarray:
         """
-        Construct the current observation.
+        Construct the normalized observation.
         """
 
         stock_price = self.path.prices[
@@ -348,12 +384,45 @@ class HedgingEnv(gym.Env):
             self.rate,
         )
 
+        # -----------------------------------------
+        # Normalize observations
+        # -----------------------------------------
+
+        normalized_stock = (
+            stock_price
+            / self.contract.strike
+        )
+
+        normalized_time = (
+            remaining
+            / self.contract.maturity
+        )
+
+        normalized_delta = option_delta
+
+        normalized_shares = (
+            self.portfolio.shares
+            / self.max_position
+        )
+
+        initial_option_price = black_scholes_price(
+            contract=self.contract,
+            spot=self.path.prices[0, 0],
+            volatility=self.volatility,
+            rate=self.rate,
+        )
+
+        normalized_cash = (
+            self.portfolio.cash
+            / max(initial_option_price, 1e-8)
+        )
+
         state = EnvironmentState(
-            stock_price=stock_price,
-            time_to_maturity=remaining,
-            delta=option_delta,
-            shares_held=self.portfolio.shares,
-            cash_balance=self.portfolio.cash,
+            stock_price=normalized_stock,
+            time_to_maturity=normalized_time,
+            delta=normalized_delta,
+            shares_held=normalized_shares,
+            cash_balance=normalized_cash,
         )
 
         return state.to_numpy()

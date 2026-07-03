@@ -1,33 +1,37 @@
-from stable_baselines3 import DDPG
-
 from hedging.environment.hedging_env import HedgingEnv
+from hedging.evaluation.agents import DDPGAgent
+from hedging.evaluation.evaluator import Evaluator
 from hedging.pricing.option import OptionContract, OptionType
 
 
-contract = OptionContract(
-    strike=100,
-    maturity=1.0,
-    option_type=OptionType.CALL,
-)
+def main():
 
-env = HedgingEnv(contract)
+    contract = OptionContract(
+        strike=100,
+        maturity=1.0,
+        option_type=OptionType.CALL,
+    )
 
-model = DDPG.load("outputs/models/ddpg_hedger")
+    env = HedgingEnv(contract)
 
-obs, info = env.reset(seed=42)
+    evaluator = Evaluator(env)
 
-done = False
+    agent = DDPGAgent(
+        "outputs/models/ddpg_hedger.zip"
+    )
 
-total_reward = 0.0
+    results = evaluator.evaluate(
+        agent,
+        episodes=50,
+        seed=42,
+    )
 
-while not done:
+    print("\n===== DDPG Evaluation =====")
+    print(f"Episodes                 : {results.episodes}")
+    print(f"Average Reward           : {results.total_reward:.2f}")
+    print(f"Average Portfolio Value  : {results.final_portfolio_value:.2f}")
+    print(f"Average Transaction Cost : {results.total_transaction_cost:.2f}")
 
-    action, _ = model.predict(obs, deterministic=True)
 
-    obs, reward, terminated, truncated, info = env.step(action)
-
-    total_reward += reward
-
-    done = terminated or truncated
-
-print(f"Total Reward : {total_reward:.4f}")
+if __name__ == "__main__":
+    main()

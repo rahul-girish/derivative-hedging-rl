@@ -1,8 +1,16 @@
+from __future__ import annotations
+
+import numpy as np
+
 from stable_baselines3 import DDPG
 from stable_baselines3.common.monitor import Monitor
+from stable_baselines3.common.noise import NormalActionNoise
 
 from hedging.environment.hedging_env import HedgingEnv
-from hedging.pricing.option import OptionContract, OptionType
+from hedging.pricing.option import (
+    OptionContract,
+    OptionType,
+)
 
 
 def main():
@@ -16,19 +24,56 @@ def main():
     env = HedgingEnv(contract)
     env = Monitor(env)
 
+    # -----------------------------------------
+    # Exploration noise
+    # -----------------------------------------
+
+    n_actions = env.action_space.shape[-1]
+
+    action_noise = NormalActionNoise(
+        mean=np.zeros(n_actions),
+        sigma=0.10 * np.ones(n_actions),
+    )
+
+    # -----------------------------------------
+    # DDPG Model
+    # -----------------------------------------
+
     model = DDPG(
         policy="MlpPolicy",
         env=env,
-        verbose=1,
-        learning_rate=1e-3,
-        buffer_size=100000,
+
+        learning_rate=3e-4,
+        buffer_size=100_000,
+        learning_starts=5_000,
         batch_size=256,
+
+        gamma=0.99,
+        tau=0.005,
+
+        action_noise=action_noise,
+
         tensorboard_log="outputs/logs/",
+
+        verbose=1,
     )
 
-    model.learn(total_timesteps=50_000)
+    # -----------------------------------------
+    # Train
+    # -----------------------------------------
 
-    model.save("outputs/models/ddpg_hedger")
+    model.learn(
+        total_timesteps=500_000,
+        progress_bar=True,
+    )
+
+    # -----------------------------------------
+    # Save
+    # -----------------------------------------
+
+    model.save(
+        "outputs/models/ddpg_hedger_v2"
+    )
 
 
 if __name__ == "__main__":
