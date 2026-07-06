@@ -1,71 +1,271 @@
-# Derivative Hedging using Deep Reinforcement Learning
+#  Derivative Hedging using Deep Reinforcement Learning
 
-A modular Python framework for **option hedging** using **Deep Deterministic Policy Gradient (DDPG)**. The project compares a reinforcement learning based hedging strategy against classical Black-Scholes Delta Hedging and a Random baseline under simulated market conditions.
-
----
-
-## Overview
-
-This project implements an end-to-end reinforcement learning framework for dynamic option hedging.
-
-The framework includes:
-
-- Black-Scholes option pricing
-- Greeks computation
-- Geometric Brownian Motion (GBM) market simulator
-- Portfolio and transaction cost modeling
-- Custom Gymnasium environment
-- DDPG reinforcement learning agent
-- Classical Delta Hedging baseline
-- Evaluation framework with multiple performance metrics
-- Automated visualization and result generation
+A Reinforcement Learning framework for dynamic option hedging using **Deep Deterministic Policy Gradient (DDPG)**. The project compares a learned hedging strategy against **Random Hedging** and the classical **Black–Scholes Delta Hedging** strategy using a realistic market simulation.
 
 ---
 
-## Features
+##  Overview
 
-### Financial Models
+Dynamic option hedging aims to minimize the risk of holding derivative contracts by continuously adjusting the hedge position as market conditions evolve.
 
-- European Call and Put Options
-- Black-Scholes Pricing
-- Greeks
-  - Delta
-  - Gamma
-  - Vega
-  - Theta
-  - Rho
+Traditional approaches rely on the **Black–Scholes Delta Hedging** strategy, which assumes perfect market conditions and continuous rebalancing. In practice, transaction costs, market uncertainty, and discrete trading reduce its effectiveness.
 
-### Market Simulation
+This project formulates option hedging as a **Reinforcement Learning** problem, where a DDPG agent learns an optimal hedging policy by interacting with a simulated financial market.
 
-- Geometric Brownian Motion (GBM)
-- Configurable volatility
-- Configurable interest rate
-- Randomized market scenarios
-- Multiple simulation paths
+---
 
-### Portfolio Management
+##  Features
 
-- Cash account
-- Stock inventory
-- Short option position
-- Portfolio valuation
-- Transaction costs
+-  Geometric Brownian Motion (GBM) stock price simulation
+-  Black–Scholes option pricing
+-  Analytical Greeks (Delta)
+-  Portfolio simulation engine
+-  Transaction cost modeling
+-  Gymnasium-based Reinforcement Learning environment
+-  Deep Deterministic Policy Gradient (DDPG)
+-  Random Hedging baseline
+-  Classical Black–Scholes Delta Hedging baseline
+-  Comprehensive evaluation framework
+-  Automatic CSV result generation
+-  Publication-quality evaluation plots
+-  Interactive Streamlit dashboard
+-  Unit tested using PyTest
 
-### Reinforcement Learning
+---
 
-- Gymnasium Environment
-- Continuous Action Space
-- Reward Shaping
-- Observation Normalization
-- Stable-Baselines3 DDPG
+# Project Architecture
 
-### Hedging Strategies
+```
+                +-----------------------+
+                |  GBM Price Simulator  |
+                +-----------+-----------+
+                            |
+                            |
+                +-----------v-----------+
+                |  Hedging Environment  |
+                +-----------+-----------+
+                            |
+          +-----------------+-----------------+
+          |                                   |
+          |                                   |
++---------v---------+               +---------v---------+
+|   Delta Hedging   |               |    DDPG Agent     |
++---------+---------+               +---------+---------+
+          |                                   |
+          +-----------------+-----------------+
+                            |
+                            |
+                +-----------v-----------+
+                | Evaluation Framework  |
+                +-----------+-----------+
+                            |
+          +-----------------+-----------------+
+          |                                   |
+          |                                   |
++---------v---------+               +---------v---------+
+| CSV Results       |               | Streamlit Dashboard|
++-------------------+               +-------------------+
+```
 
-- Random Agent
-- Black-Scholes Delta Hedging
-- Deep Reinforcement Learning (DDPG)
+---
 
-### Evaluation Metrics
+# Repository Structure
+
+```
+derivative-hedging-rl/
+
+├── dashboard/
+│   ├── app.py
+│   └── pages/
+│
+├── data/
+│
+├── outputs/
+│   ├── figures/
+│   ├── logs/
+│   ├── models/
+│   └── results/
+│
+├── scripts/
+│   ├── train_ddpg.py
+│   ├── compare_agents.py
+│   └── plot_results.py
+│
+├── src/
+│   └── hedging/
+│       ├── environment/
+│       ├── evaluation/
+│       ├── pricing/
+│       └── simulation/
+│
+├── tests/
+│
+├── README.md
+└── pyproject.toml
+```
+
+---
+
+# Installation
+
+Clone the repository
+
+```bash
+git clone https://github.com/rahul-girish/derivative-hedging-rl.git
+cd derivative-hedging-rl
+```
+
+Create a virtual environment
+
+```bash
+python -m venv .venv
+```
+
+Activate
+
+Windows
+
+```bash
+.venv\Scripts\activate
+```
+
+Linux / macOS
+
+```bash
+source .venv/bin/activate
+```
+
+Install dependencies
+
+```bash
+pip install -e .
+```
+
+---
+
+# Training the DDPG Agent
+
+```bash
+python -m scripts.train_ddpg
+```
+
+The trained model will be saved in
+
+```
+outputs/models/
+```
+
+---
+
+# Evaluating Agents
+
+Run
+
+```bash
+python -m scripts.compare_agents
+```
+
+This compares
+
+- Random Hedging
+- Black–Scholes Delta Hedging
+- DDPG Hedging
+
+Results are automatically stored in
+
+```
+outputs/results/comparison.csv
+```
+
+---
+
+# Generating Evaluation Plots
+
+```bash
+python -m scripts.plot_results
+```
+
+Generated figures include
+
+- Reward Comparison
+- Portfolio Value
+- Transaction Cost
+- Mean Hedging Error
+- RMSE
+- Summary Figure
+
+Saved in
+
+```
+outputs/figures/
+```
+
+---
+
+# Streamlit Dashboard
+
+Launch the interactive dashboard
+
+```bash
+streamlit run dashboard/app.py
+```
+
+The dashboard contains
+
+###  Home
+
+Project overview and KPI metrics.
+
+###  Agent Comparison
+
+Interactive Plotly comparison between
+
+- Random
+- Delta
+- DDPG
+
+###  Generated Figures
+
+Automatically displays generated evaluation figures.
+
+###  Environment Explorer
+
+Interactive controls for
+
+- Strike Price
+- Volatility
+- Interest Rate
+- Maturity
+- Initial Stock Price
+
+###  Model Information
+
+Displays
+
+- DDPG architecture
+- Hyperparameters
+- Replay buffer
+- Learning rate
+- Training configuration
+
+###  Performance Summary
+
+Radar chart comparing all agents.
+
+###  About
+
+Financial theory including
+
+- Black–Scholes
+- Delta Hedging
+- Geometric Brownian Motion
+- Reinforcement Learning
+
+---
+
+# Evaluation Metrics
+
+The framework evaluates
 
 - Average Reward
 - Portfolio Value
@@ -77,174 +277,42 @@ The framework includes:
 
 ---
 
-## Project Structure
+# Example Results
 
-```text
-derivative-hedging-rl/
-│
-├── configs/
-├── data/
-├── docs/
-├── notebooks/
-├── outputs/
-│   ├── figures/
-│   ├── models/
-│   └── results/
-│
-├── scripts/
-│   ├── train_ddpg.py
-│   ├── compare_agents.py
-│   └── plot_results.py
-│
-├── src/
-│   └── hedging/
-│       ├── baseline/
-│       ├── environment/
-│       ├── evaluation/
-│       ├── pricing/
-│       └── simulation/
-│
-├── tests/
-│
-├── requirements.txt
-├── pyproject.toml
-└── README.md
-```
+| Agent | Reward | Portfolio | Cost | RMSE |
+|-------|--------:|----------:|-----:|-----:|
+| Random | -1,185,554 | -89.64 | 89.96 | 68.59 |
+| Delta | -764,844 | 28.37 | 2.75 | 55.09 |
+| DDPG | **-702,970** | 7.48 | 8.44 | **52.82** |
+
+The trained DDPG agent achieved the best overall hedging performance by minimizing hedging error while maintaining relatively low transaction costs.
 
 ---
 
-## Installation
+# Testing
 
-Clone the repository
-
-```bash
-git clone https://github.com/<your-username>/derivative-hedging-rl.git
-
-cd derivative-hedging-rl
-```
-
-Create a virtual environment
-
-```bash
-python -m venv .venv
-```
-
-Activate the environment
-
-Windows
-
-```bash
-.venv\Scripts\activate
-```
-
-Linux/macOS
-
-```bash
-source .venv/bin/activate
-```
-
-Install dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
----
-
-## Training
-
-Train the DDPG agent
-
-```bash
-python -m scripts.train_ddpg
-```
-
-The trained model is saved to
-
-```
-outputs/models/
-```
-
----
-
-## Evaluation
-
-Compare all hedging strategies
-
-```bash
-python -m scripts.compare_agents
-```
-
-Results are stored in
-
-```
-outputs/results/comparison.csv
-```
-
----
-
-## Generate Plots
-
-```bash
-python -m scripts.plot_results
-```
-
-Plots are saved in
-
-```
-outputs/figures/
-```
-
----
-
-## Testing
-
-Run all unit tests
+Run all tests
 
 ```bash
 pytest
 ```
 
-Current Status
-
-```
-18 / 18 Tests Passed
-```
-
 ---
 
-## Experimental Results
-
-| Agent | Reward | Portfolio | Transaction Cost | Mean Error | RMSE |
-|-------|--------:|----------:|-----------------:|-----------:|------:|
-| Random | -1,185,554 | -89.64 | 89.96 | 50.92 | 68.59 |
-| Delta Hedging | -764,844 | 28.37 | 2.75 | 35.05 | 55.09 |
-| **DDPG (Proposed)** | **-702,970** | 7.48 | 8.44 | 38.38 | **52.82** |
-
-### Key Findings
-
-- DDPG achieved the **highest cumulative reward**.
-- DDPG achieved the **lowest RMSE** among all evaluated strategies.
-- Delta Hedging achieved the lowest transaction cost.
-- Reward shaping and observation normalization significantly improved RL performance over the initial DDPG implementation.
-
----
-
-## Technologies Used
+# Technologies Used
 
 - Python
 - NumPy
 - SciPy
+- Pandas
 - Gymnasium
 - Stable-Baselines3
 - PyTorch
+- Streamlit
+- Plotly
 - Matplotlib
-- Pytest
+- PyTest
 
 ---
 
-## License
-
-This project is licensed under the MIT License.
-
----
+This project is intended for academic and educational purposes.
