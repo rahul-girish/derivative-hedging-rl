@@ -1,76 +1,135 @@
-# Intelligent Hedging with Reinforcement Learning
+# Derivative Hedging using Deep Reinforcement Learning
 
-A research-oriented framework for developing, evaluating, and comparing reinforcement learning methods for dynamic derivative hedging under transaction costs.
+A modular Python framework for **option hedging** using **Deep Deterministic Policy Gradient (DDPG)**. The project compares a reinforcement learning based hedging strategy against classical Black-Scholes Delta Hedging and a Random baseline under simulated market conditions.
 
 ---
 
 ## Overview
 
-This project investigates whether reinforcement learning can outperform traditional delta hedging by learning optimal hedge adjustments under realistic market conditions.
+This project implements an end-to-end reinforcement learning framework for dynamic option hedging.
 
-The framework is designed to be:
+The framework includes:
 
-- Modular
-- Reproducible
-- Extensible
-- Research-friendly
-
-The implementation is inspired primarily by:
-
-- Deep Hedging of Derivatives Using Reinforcement Learning (Cao et al.)
-- Hedging using Reinforcement Learning: Contextual Bandits versus Q-learning
+- Black-Scholes option pricing
+- Greeks computation
+- Geometric Brownian Motion (GBM) market simulator
+- Portfolio and transaction cost modeling
+- Custom Gymnasium environment
+- DDPG reinforcement learning agent
+- Classical Delta Hedging baseline
+- Evaluation framework with multiple performance metrics
+- Automated visualization and result generation
 
 ---
 
 ## Features
 
-- Black-Scholes pricing engine
-- Option Greeks
-- GBM and stochastic volatility simulators
-- Portfolio accounting
-- Delta hedging baseline
-- Threshold hedging baseline
-- Deep RL agents (DDPG, TD3, SAC)
-- Contextual bandit adaptation
-- Prioritized replay
-- Particle Swarm Optimization (PSO)
-- Comprehensive backtesting
-- Risk metrics and stress testing
+### Financial Models
+
+- European Call and Put Options
+- Black-Scholes Pricing
+- Greeks
+  - Delta
+  - Gamma
+  - Vega
+  - Theta
+  - Rho
+
+### Market Simulation
+
+- Geometric Brownian Motion (GBM)
+- Configurable volatility
+- Configurable interest rate
+- Randomized market scenarios
+- Multiple simulation paths
+
+### Portfolio Management
+
+- Cash account
+- Stock inventory
+- Short option position
+- Portfolio valuation
+- Transaction costs
+
+### Reinforcement Learning
+
+- Gymnasium Environment
+- Continuous Action Space
+- Reward Shaping
+- Observation Normalization
+- Stable-Baselines3 DDPG
+
+### Hedging Strategies
+
+- Random Agent
+- Black-Scholes Delta Hedging
+- Deep Reinforcement Learning (DDPG)
+
+### Evaluation Metrics
+
+- Average Reward
+- Portfolio Value
+- Transaction Cost
+- Mean Hedging Error
+- RMSE
+- Standard Deviation
+- Maximum Hedging Error
 
 ---
 
 ## Project Structure
 
 ```text
-src/
-    pricing/
-    simulation/
-    environment/
-    baseline/
-    agents/
-    replay/
-    tuning/
-    evaluation/
-    utils/
+derivative-hedging-rl/
+│
+├── configs/
+├── data/
+├── docs/
+├── notebooks/
+├── outputs/
+│   ├── figures/
+│   ├── models/
+│   └── results/
+│
+├── scripts/
+│   ├── train_ddpg.py
+│   ├── compare_agents.py
+│   └── plot_results.py
+│
+├── src/
+│   └── hedging/
+│       ├── baseline/
+│       ├── environment/
+│       ├── evaluation/
+│       ├── pricing/
+│       └── simulation/
+│
+├── tests/
+│
+├── requirements.txt
+├── pyproject.toml
+└── README.md
 ```
 
 ---
 
 ## Installation
 
-Clone the repository.
+Clone the repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/<your-username>/derivative-hedging-rl.git
+
+cd derivative-hedging-rl
 ```
 
-Create a virtual environment.
+Create a virtual environment
 
 ```bash
 python -m venv .venv
 ```
 
-Activate it.
+Activate the environment
 
 Windows
 
@@ -84,7 +143,7 @@ Linux/macOS
 source .venv/bin/activate
 ```
 
-Install dependencies.
+Install dependencies
 
 ```bash
 pip install -r requirements.txt
@@ -92,78 +151,100 @@ pip install -r requirements.txt
 
 ---
 
-## Development Workflow
+## Training
 
-Every feature follows the same process.
+Train the DDPG agent
 
-1. Implement
-2. Test
-3. Refactor
-4. Document
-5. Commit
+```bash
+python -m scripts.train_ddpg
+```
 
-No feature is considered complete until unit tests pass.
+The trained model is saved to
 
----
-
-## Project Roadmap
-
-### Phase 1 — Financial Foundations
-
-- Option contract model
-- Black-Scholes pricing
-- Greeks
-- GBM simulator
-- Portfolio accounting
-- Delta hedging
-
-### Phase 2 — Environment
-
-- Hedging environment
-- Reward functions
-- Transaction costs
-- Accounting P&L
-
-### Phase 3 — Baselines
-
-- Delta hedging
-- Threshold hedging
-- No hedge
-
-### Phase 4 — Reinforcement Learning
-
-- Replay buffer
-- DDPG
-- Prioritized replay
-- Twin critics
-- Risk-aware objective
-
-### Phase 5 — Online Adaptation
-
-- Contextual bandits
-- Hybrid RL + Bandit
-
-### Phase 6 — Optimization
-
-- Particle Swarm Optimization
-- Hyperparameter tuning
+```
+outputs/models/
+```
 
 ---
 
-## Current Status
+## Evaluation
 
-| Module | Status |
-|---------|--------|
-| Project Skeleton | ✅ |
-| Pricing Engine | ⏳ |
-| Greeks | ⏳ |
-| Simulator | ⏳ |
-| Environment | ⏳ |
-| Baselines | ⏳ |
-| RL Agents | ⏳ |
+Compare all hedging strategies
+
+```bash
+python -m scripts.compare_agents
+```
+
+Results are stored in
+
+```
+outputs/results/comparison.csv
+```
+
+---
+
+## Generate Plots
+
+```bash
+python -m scripts.plot_results
+```
+
+Plots are saved in
+
+```
+outputs/figures/
+```
+
+---
+
+## Testing
+
+Run all unit tests
+
+```bash
+pytest
+```
+
+Current Status
+
+```
+18 / 18 Tests Passed
+```
+
+---
+
+## Experimental Results
+
+| Agent | Reward | Portfolio | Transaction Cost | Mean Error | RMSE |
+|-------|--------:|----------:|-----------------:|-----------:|------:|
+| Random | -1,185,554 | -89.64 | 89.96 | 50.92 | 68.59 |
+| Delta Hedging | -764,844 | 28.37 | 2.75 | 35.05 | 55.09 |
+| **DDPG (Proposed)** | **-702,970** | 7.48 | 8.44 | 38.38 | **52.82** |
+
+### Key Findings
+
+- DDPG achieved the **highest cumulative reward**.
+- DDPG achieved the **lowest RMSE** among all evaluated strategies.
+- Delta Hedging achieved the lowest transaction cost.
+- Reward shaping and observation normalization significantly improved RL performance over the initial DDPG implementation.
+
+---
+
+## Technologies Used
+
+- Python
+- NumPy
+- SciPy
+- Gymnasium
+- Stable-Baselines3
+- PyTorch
+- Matplotlib
+- Pytest
 
 ---
 
 ## License
 
-MIT License
+This project is licensed under the MIT License.
+
+---
