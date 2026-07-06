@@ -162,7 +162,7 @@ def main():
     ddpg_result = evaluate_agent(
         "DDPG",
         DDPGAgent(
-            "outputs/models/ddpg_hedger.zip",
+            "outputs/models/ddpg_hedger_v2",
         ),
         evaluator,
     )

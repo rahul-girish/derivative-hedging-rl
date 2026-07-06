@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import numpy as np
+from torch import nn
 
 from stable_baselines3 import DDPG
 from stable_baselines3.common.monitor import Monitor
@@ -15,6 +16,10 @@ from hedging.pricing.option import (
 
 def main():
 
+    # -------------------------------------------------
+    # Option Contract
+    # -------------------------------------------------
+
     contract = OptionContract(
         strike=100,
         maturity=1.0,
@@ -24,9 +29,9 @@ def main():
     env = HedgingEnv(contract)
     env = Monitor(env)
 
-    # -----------------------------------------
-    # Exploration noise
-    # -----------------------------------------
+    # -------------------------------------------------
+    # Exploration Noise
+    # -------------------------------------------------
 
     n_actions = env.action_space.shape[-1]
 
@@ -35,9 +40,21 @@ def main():
         sigma=0.10 * np.ones(n_actions),
     )
 
-    # -----------------------------------------
+    # -------------------------------------------------
+    # Neural Network Architecture
+    # -------------------------------------------------
+
+    policy_kwargs = dict(
+        activation_fn=nn.ReLU,
+        net_arch=dict(
+            pi=[256, 256],
+            qf=[256, 256],
+        ),
+    )
+
+    # -------------------------------------------------
     # DDPG Model
-    # -----------------------------------------
+    # -------------------------------------------------
 
     model = DDPG(
         policy="MlpPolicy",
@@ -53,23 +70,24 @@ def main():
 
         action_noise=action_noise,
 
-        tensorboard_log="outputs/logs/",
+        policy_kwargs=policy_kwargs,
+
+        tensorboard_log="outputs/logs/ddpg_v2",
 
         verbose=1,
     )
 
-    # -----------------------------------------
+    # -------------------------------------------------
     # Train
-    # -----------------------------------------
+    # -------------------------------------------------
 
     model.learn(
         total_timesteps=500_000,
-        progress_bar=True,
     )
 
-    # -----------------------------------------
-    # Save
-    # -----------------------------------------
+    # -------------------------------------------------
+    # Save Model
+    # -------------------------------------------------
 
     model.save(
         "outputs/models/ddpg_hedger_v2"
