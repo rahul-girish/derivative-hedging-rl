@@ -54,6 +54,8 @@ class Backtester:
 
         result = BacktestResult(prices=path.prices[0])
 
+        vol_window = 20
+
         for step, stock_price in enumerate(prices):
 
             remaining = max(
@@ -74,11 +76,21 @@ class Backtester:
                 rate,
             )
 
+            realized_vol = self._realized_vol(
+                prices,
+                step,
+                vol_window,
+                path.dt,
+                fallback=volatility,
+            )
+
             target = hedger.target_position(
                 option,
                 stock_price,
                 volatility,
                 rate,
+                current_position=portfolio.shares,
+                realized_vol=realized_vol,
             )
 
             cost = self.execution_engine.rebalance(
@@ -86,6 +98,9 @@ class Backtester:
                 target,
                 stock_price,
             )
+
+            if hasattr(hedger, "update"):
+                hedger.update(cost, stock_price)
 
             value = portfolio.total_value(
                 stock_price,
@@ -100,3 +115,20 @@ class Backtester:
             result.transaction_costs.append(cost)
 
         return result
+
+    @staticmethod
+    def _realized_vol(
+        prices: np.ndarray,
+        step: int,
+        window: int,
+        dt: float,
+        fallback: float,
+    ) -> float:
+        start = max(0, step - window)
+        if step - start < 2:
+            return fallback
+
+        history = prices[start : step + 1]
+        log_returns = np.diff(np.log(history))
+
+        return float(np.std(log_returns) / np.sqrt(dt))

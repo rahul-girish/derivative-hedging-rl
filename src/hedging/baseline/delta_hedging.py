@@ -14,6 +14,7 @@ class DeltaHedger:
         stock_price: float,
         volatility: float,
         rate: float = 0.0,
+        **_: object,
     ) -> float:
 
         return delta(
